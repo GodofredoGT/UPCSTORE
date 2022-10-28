@@ -116,42 +116,27 @@ namespace c4_model_design
             contextView.PaperSize = PaperSize.A4_Landscape;
             containerView.AddAllElements();
 
-            // 3. Diagrama de Componentes (Monitoring Context)
+            // 3. Diagrama de Componentes (mapping Context)
             Component domainLayer = mappingContext.AddComponent("Domain Layer", "", "NodeJS (NestJS)");
+            Component mappingController = mappingContext.AddComponent("MappingController", "REST API endpoints de monitoreo.", "NodeJS (NestJS) REST Controller");
+            Component monitoringApplicationService = mappingContext.AddComponent("MonitoringApplicationService", "Provee métodos para la localizacion, pertenece a la capa Application de DDD", "NestJS Component");
+            Component locationRepository = mappingContext.AddComponent("LocationRepository", "Ubicación del supermercado", "NestJS Component");
 
-            Component monitoringController = mappingContext.AddComponent("MonitoringController", "REST API endpoints de monitoreo.", "NodeJS (NestJS) REST Controller");
-
-            Component monitoringApplicationService = mappingContext.AddComponent("MonitoringApplicationService", "Provee métodos para el monitoreo, pertenece a la capa Application de DDD", "NestJS Component");
-
-            Component flightRepository = mappingContext.AddComponent("FlightRepository", "Información del vuelo", "NestJS Component");
-            Component vaccineLoteRepository = mappingContext.AddComponent("VaccineLoteRepository", "Información de lote de vacunas", "NestJS Component");
-            Component locationRepository = mappingContext.AddComponent("LocationRepository", "Ubicación del vuelo", "NestJS Component");
-
-            Component aircraftSystemFacade = mappingContext.AddComponent("Aircraft System Facade", "", "NestJS Component");
-
-            apiRest.Uses(monitoringController, "", "JSON/HTTPS");
-            monitoringController.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
+            apiRest.Uses(mappingController, "", "JSON/HTTPS");
+            mappingController.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
 
             monitoringApplicationService.Uses(domainLayer, "Usa", "");
-            monitoringApplicationService.Uses(aircraftSystemFacade, "Usa");
-            monitoringApplicationService.Uses(flightRepository, "", "");
-            monitoringApplicationService.Uses(vaccineLoteRepository, "", "");
             monitoringApplicationService.Uses(locationRepository, "", "");
 
-            flightRepository.Uses(database, "", "");
-            vaccineLoteRepository.Uses(database, "", "");
             locationRepository.Uses(database, "", "");
 
             locationRepository.Uses(googleMaps, "", "JSON/HTTPS");
 
             // Tags
             domainLayer.AddTags("DomainLayer");
-            monitoringController.AddTags("MonitoringController");
+            mappingController.AddTags("MonitoringController");
             monitoringApplicationService.AddTags("MonitoringApplicationService");
-            flightRepository.AddTags("FlightRepository");
-            vaccineLoteRepository.AddTags("VaccineLoteRepository");
             locationRepository.AddTags("LocationRepository");
-            aircraftSystemFacade.AddTags("AircraftSystemFacade");
 
             styles.Add(new ElementStyle("DomainLayer") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("MonitoringController") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
@@ -163,13 +148,45 @@ namespace c4_model_design
             styles.Add(new ElementStyle("LocationRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("AircraftSystemFacade") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
 
-            ComponentView componentView = viewSet.CreateComponentView(mappingContext, "Components", "Component Diagram");
-            componentView.PaperSize = PaperSize.A4_Landscape;
-            componentView.Add(webApplication);
-            componentView.Add(apiRest);
-            componentView.Add(database);
-            componentView.Add(googleMaps);
-            componentView.AddAllComponents();
+            ComponentView componentView1 = viewSet.CreateComponentView(mappingContext, "Components1", "Component Diagram");
+            componentView1.PaperSize = PaperSize.A4_Landscape;
+            componentView1.Add(webApplication);
+            componentView1.Add(apiRest);
+            componentView1.Add(database);
+            componentView1.Add(googleMaps);
+            componentView1.AddAllComponents();
+
+            // 3. Diagrama de Componentes (security Context)
+            Component securityComponent = securityContext.AddComponent("Security Component", "", "NodeJS (NestJS)");
+            Component verifyUser= securityContext.AddComponent("MonitoringApplicationService", "Provee métodos para el monitoreo, pertenece a la capa Application de DDD", "NestJS Component");
+            Component verifyUserRepository = securityContext.AddComponent("verifyUserRepository", "Información del Usuario", "NestJS Component");
+
+            apiRest.Uses(securityComponent, "", "JSON/HTTPS");
+            securityComponent.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
+
+            monitoringApplicationService.Uses(securityComponent, "Usa", "");
+            monitoringApplicationService.Uses(verifyUser, "", "");
+            monitoringApplicationService.Uses(verifyUserRepository, "", "");
+
+            locationRepository.Uses(database, "", "");
+
+            locationRepository.Uses(googleMaps, "", "JSON/HTTPS");
+
+            // Tags
+            securityComponent.AddTags("securityComponent");
+            verifyUser.AddTags("verifyUser");
+            verifyUserRepository.AddTags("verifyUserRepository");
+
+            styles.Add(new ElementStyle("securityComponent") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("verifyUser") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("verifyUserRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+
+            ComponentView componentView2 = viewSet.CreateComponentView(securityContext, "Components2", "Component Diagram");
+            componentView2.PaperSize = PaperSize.A4_Landscape;
+            componentView2.Add(webApplication);
+            componentView2.Add(apiRest);
+            componentView2.Add(database);
+            componentView2.AddAllComponents();
 
             structurizrClient.UnlockWorkspace(workspaceId);
             structurizrClient.PutWorkspace(workspaceId, workspace);
