@@ -25,28 +25,28 @@ namespace c4_model_design
             Model model = workspace.Model;
 
             // 1. Diagrama de Contexto
-            SoftwareSystem monitoringSystem = model.AddSoftwareSystem("Monitoreo del Traslado Aéreo de Vacunas SARS-CoV-2", "Permite el seguimiento y monitoreo del traslado aéreo a nuestro país de las vacunas para la COVID-19.");
+            SoftwareSystem monitoringSystem = model.AddSoftwareSystem("UPC Store System", "Permite al usuario comparar precios de productos alimenticios que se encuentran en diferentes supermercados");
             SoftwareSystem googleMaps = model.AddSoftwareSystem("Google Maps", "Plataforma que ofrece una REST API de información geo referencial.");
             SoftwareSystem supermercado = model.AddSoftwareSystem("SuperMercado", "Plataforma que ofrece productos alimentarios en ofertas");
            
-            Person ciudadano = model.AddPerson("Ciudadano", "Ciudadano peruano.");
+            Person user = model.AddPerson("Usuario", "Usuario comun");
             Person admin = model.AddPerson("Admin", "User Admin.");
 
-            ciudadano.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
+            user.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
             admin.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
 
             monitoringSystem.Uses(googleMaps, "Usa la API de google maps");
             monitoringSystem.Uses(supermercado, "Usa la API de Mercados y tiendas");
 
             // Tags
-            ciudadano.AddTags("Ciudadano");
+            user.AddTags("Usuario");
             admin.AddTags("Admin");
             monitoringSystem.AddTags("SistemaMonitoreo");
             googleMaps.AddTags("GoogleMaps");
             supermercado.AddTags("SuperMercado");
 
             Styles styles = viewSet.Configuration.Styles;
-            styles.Add(new ElementStyle("Ciudadano") { Background = "#0a60ff", Color = "#ffffff", Shape = Shape.Person });
+            styles.Add(new ElementStyle("Usuario") { Background = "#0a60ff", Color = "#ffffff", Shape = Shape.Person });
             styles.Add(new ElementStyle("Admin") { Background = "#aa60af", Color = "#ffffff", Shape = Shape.Person });
             styles.Add(new ElementStyle("SistemaMonitoreo") { Background = "#008f39", Color = "#ffffff", Shape = Shape.RoundedBox });
             styles.Add(new ElementStyle("GoogleMaps") { Background = "#90714c", Color = "#ffffff", Shape = Shape.RoundedBox });
@@ -59,49 +59,40 @@ namespace c4_model_design
             contextView.AddAllPeople();
 
             // 2. Diagrama de Contenedores
-            Container mobileApplication = monitoringSystem.AddContainer("Mobile App", "Permite a los usuarios visualizar un dashboard con el resumen de toda la información del traslado de los lotes de vacunas.", "Swift UI");
             Container webApplication = monitoringSystem.AddContainer("Web App", "Permite a los usuarios visualizar un dashboard con el resumen de toda la información del traslado de los lotes de vacunas.", "React");
             Container landingPage = monitoringSystem.AddContainer("Landing Page", "", "React");
             Container apiRest = monitoringSystem.AddContainer("API REST", "API Rest", "NodeJS (NestJS) port 8080");
 
-            Container flightPlanningContext = monitoringSystem.AddContainer("Flight Planning Context", "Bounded Context de Planificación de Vuelos", "NodeJS (NestJS)");
-            Container airportContext = monitoringSystem.AddContainer("Airport Context", "Bounded Context de información de Aeropuertos", "NodeJS (NestJS)");
-            Container aircraftInventoryContext = monitoringSystem.AddContainer("Aircraft Inventory Context", "Bounded Context de Inventario de Aviones", "NodeJS (NestJS)");
-            Container vaccinesInventoryContext = monitoringSystem.AddContainer("Vaccines Inventory Context", "Bounded Context de Inventario de Vacunas", "NodeJS (NestJS)");
-            Container monitoringContext = monitoringSystem.AddContainer("Monitoring Context", "Bounded Context de Monitoreo en tiempo real del status y ubicación del vuelo que transporta las vacunas", "NodeJS (NestJS)");
+            Container searchContext = monitoringSystem.AddContainer("Search Context", "Bounded Context de Busqueda de supermercados", "NodeJS (NestJS)");
+            Container compareContext = monitoringSystem.AddContainer("Compare Context", "Bounded Context de Comparacion de precios", "NodeJS (NestJS)");
+            Container mappingContext = monitoringSystem.AddContainer("Mapping Context", "Bounded Context de mapeo de los supermercados ", "NodeJS (NestJS)");
             Container securityContext = monitoringSystem.AddContainer("Security Context", "Bounded Context de Seguridad", "NodeJS (NestJS)");
 
             Container database = monitoringSystem.AddContainer("Database", "", "Oracle");
 
-            ciudadano.Uses(mobileApplication, "Consulta");
-            ciudadano.Uses(webApplication, "Consulta");
-            ciudadano.Uses(landingPage, "Consulta");
+            user.Uses(webApplication, "Consulta");
+            user.Uses(landingPage, "Consulta");
 
-            admin.Uses(mobileApplication, "Consulta");
             admin.Uses(webApplication, "Consulta");
             admin.Uses(landingPage, "Consulta");
 
-            mobileApplication.Uses(apiRest, "API Request", "JSON/HTTPS");
             webApplication.Uses(apiRest, "API Request", "JSON/HTTPS");
 
-            apiRest.Uses(flightPlanningContext, "", "");
-            apiRest.Uses(airportContext, "", "");
-            apiRest.Uses(aircraftInventoryContext, "", "");
-            apiRest.Uses(vaccinesInventoryContext, "", "");
-            apiRest.Uses(monitoringContext, "", "");
+            apiRest.Uses(searchContext, "", "");
+            apiRest.Uses(compareContext, "", "");
+            apiRest.Uses(mappingContext, "", "");
             apiRest.Uses(securityContext, "", "");
 
-            flightPlanningContext.Uses(database, "", "");
-            airportContext.Uses(database, "", "");
-            aircraftInventoryContext.Uses(database, "", "");
-            vaccinesInventoryContext.Uses(database, "", "");
-            monitoringContext.Uses(database, "", "");
+            searchContext.Uses(database, "", "");
+            compareContext.Uses(database, "", "");
+            mappingContext.Uses(database, "", "");
             securityContext.Uses(database, "", "");
 
-            monitoringContext.Uses(googleMaps, "API Request", "JSON/HTTPS");
+            mappingContext.Uses(googleMaps, "API Request", "JSON/HTTPS");
+            searchContext.Uses(supermercado, "API Request", "JSON/HTTPS");
+            compareContext.Uses(supermercado, "API Request", "JSON/HTTPS");
 
             // Tags
-            mobileApplication.AddTags("MobileApp");
             webApplication.AddTags("WebApp");
             landingPage.AddTags("LandingPage");
             apiRest.AddTags("APIRest");
@@ -109,11 +100,9 @@ namespace c4_model_design
 
             string contextTag = "Context";
 
-            flightPlanningContext.AddTags(contextTag);
-            airportContext.AddTags(contextTag);
-            aircraftInventoryContext.AddTags(contextTag);
-            vaccinesInventoryContext.AddTags(contextTag);
-            monitoringContext.AddTags(contextTag);
+            searchContext.AddTags(contextTag);
+            compareContext.AddTags(contextTag);
+            mappingContext.AddTags(contextTag);
             securityContext.AddTags(contextTag);
 
             styles.Add(new ElementStyle("MobileApp") { Background = "#9d33d6", Color = "#ffffff", Shape = Shape.MobileDevicePortrait, Icon = "" });
@@ -128,17 +117,17 @@ namespace c4_model_design
             containerView.AddAllElements();
 
             // 3. Diagrama de Componentes (Monitoring Context)
-            Component domainLayer = monitoringContext.AddComponent("Domain Layer", "", "NodeJS (NestJS)");
+            Component domainLayer = mappingContext.AddComponent("Domain Layer", "", "NodeJS (NestJS)");
 
-            Component monitoringController = monitoringContext.AddComponent("MonitoringController", "REST API endpoints de monitoreo.", "NodeJS (NestJS) REST Controller");
+            Component monitoringController = mappingContext.AddComponent("MonitoringController", "REST API endpoints de monitoreo.", "NodeJS (NestJS) REST Controller");
 
-            Component monitoringApplicationService = monitoringContext.AddComponent("MonitoringApplicationService", "Provee métodos para el monitoreo, pertenece a la capa Application de DDD", "NestJS Component");
+            Component monitoringApplicationService = mappingContext.AddComponent("MonitoringApplicationService", "Provee métodos para el monitoreo, pertenece a la capa Application de DDD", "NestJS Component");
 
-            Component flightRepository = monitoringContext.AddComponent("FlightRepository", "Información del vuelo", "NestJS Component");
-            Component vaccineLoteRepository = monitoringContext.AddComponent("VaccineLoteRepository", "Información de lote de vacunas", "NestJS Component");
-            Component locationRepository = monitoringContext.AddComponent("LocationRepository", "Ubicación del vuelo", "NestJS Component");
+            Component flightRepository = mappingContext.AddComponent("FlightRepository", "Información del vuelo", "NestJS Component");
+            Component vaccineLoteRepository = mappingContext.AddComponent("VaccineLoteRepository", "Información de lote de vacunas", "NestJS Component");
+            Component locationRepository = mappingContext.AddComponent("LocationRepository", "Ubicación del vuelo", "NestJS Component");
 
-            Component aircraftSystemFacade = monitoringContext.AddComponent("Aircraft System Facade", "", "NestJS Component");
+            Component aircraftSystemFacade = mappingContext.AddComponent("Aircraft System Facade", "", "NestJS Component");
 
             apiRest.Uses(monitoringController, "", "JSON/HTTPS");
             monitoringController.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
@@ -174,9 +163,8 @@ namespace c4_model_design
             styles.Add(new ElementStyle("LocationRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("AircraftSystemFacade") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
 
-            ComponentView componentView = viewSet.CreateComponentView(monitoringContext, "Components", "Component Diagram");
+            ComponentView componentView = viewSet.CreateComponentView(mappingContext, "Components", "Component Diagram");
             componentView.PaperSize = PaperSize.A4_Landscape;
-            componentView.Add(mobileApplication);
             componentView.Add(webApplication);
             componentView.Add(apiRest);
             componentView.Add(database);
