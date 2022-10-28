@@ -18,7 +18,7 @@ namespace c4_model_design
 
             StructurizrClient structurizrClient = new StructurizrClient(apiKey, apiSecret);
 
-            Workspace workspace = new Workspace("Software Design & Patterns - C4 Model - Sistema de Monitoreo", "Sistema de Monitoreo del Traslado Aéreo de Vacunas SARS-CoV-2");
+            Workspace workspace = new Workspace("Software Design & Patterns - C4 Model - Sistema de comparacion de precios", "UPC Store es un software que se encarga de comparar precios de diversos supermercados");
 
             ViewSet viewSet = workspace.Views;
 
@@ -27,7 +27,6 @@ namespace c4_model_design
             // 1. Diagrama de Contexto
             SoftwareSystem monitoringSystem = model.AddSoftwareSystem("Monitoreo del Traslado Aéreo de Vacunas SARS-CoV-2", "Permite el seguimiento y monitoreo del traslado aéreo a nuestro país de las vacunas para la COVID-19.");
             SoftwareSystem googleMaps = model.AddSoftwareSystem("Google Maps", "Plataforma que ofrece una REST API de información geo referencial.");
-            SoftwareSystem aircraftSystem = model.AddSoftwareSystem("Aircraft System", "Permite transmitir información en tiempo real por el avión del vuelo a nuestro sistema");
             SoftwareSystem supermercado = model.AddSoftwareSystem("SuperMercado", "Plataforma que ofrece productos alimentarios en ofertas");
            
             Person ciudadano = model.AddPerson("Ciudadano", "Ciudadano peruano.");
@@ -36,7 +35,6 @@ namespace c4_model_design
             ciudadano.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
             admin.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
 
-            monitoringSystem.Uses(aircraftSystem, "Consulta información en tiempo real por el avión del vuelo");
             monitoringSystem.Uses(googleMaps, "Usa la API de google maps");
             monitoringSystem.Uses(supermercado, "Usa la API de Mercados y tiendas");
 
@@ -45,7 +43,6 @@ namespace c4_model_design
             admin.AddTags("Admin");
             monitoringSystem.AddTags("SistemaMonitoreo");
             googleMaps.AddTags("GoogleMaps");
-            aircraftSystem.AddTags("AircraftSystem");
             supermercado.AddTags("SuperMercado");
 
             Styles styles = viewSet.Configuration.Styles;
@@ -102,7 +99,6 @@ namespace c4_model_design
             securityContext.Uses(database, "", "");
 
             monitoringContext.Uses(googleMaps, "API Request", "JSON/HTTPS");
-            monitoringContext.Uses(aircraftSystem, "API Request", "JSON/HTTPS");
 
             // Tags
             mobileApplication.AddTags("MobileApp");
@@ -159,8 +155,6 @@ namespace c4_model_design
 
             locationRepository.Uses(googleMaps, "", "JSON/HTTPS");
 
-            aircraftSystemFacade.Uses(aircraftSystem, "JSON/HTTPS");
-
             // Tags
             domainLayer.AddTags("DomainLayer");
             monitoringController.AddTags("MonitoringController");
@@ -186,7 +180,6 @@ namespace c4_model_design
             componentView.Add(webApplication);
             componentView.Add(apiRest);
             componentView.Add(database);
-            componentView.Add(aircraftSystem);
             componentView.Add(googleMaps);
             componentView.AddAllComponents();
 
