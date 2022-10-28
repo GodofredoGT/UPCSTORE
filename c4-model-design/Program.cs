@@ -18,7 +18,7 @@ namespace c4_model_design
 
             StructurizrClient structurizrClient = new StructurizrClient(apiKey, apiSecret);
 
-            Workspace workspace = new Workspace("Software Design & Patterns - C4 Model - Sistema de Monitoreo", "Sistema de Monitoreo del Traslado Aéreo de Vacunas SARS-CoV-2");
+            Workspace workspace = new Workspace("Software Design & Patterns - C4 Model - Sistema de comparacion de precios", "UPC Store es un software que se encarga de comparar precios de diversos supermercados");
 
             ViewSet viewSet = workspace.Views;
 
