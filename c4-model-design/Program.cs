@@ -127,6 +127,7 @@ namespace c4_model_design
 
             monitoringApplicationService.Uses(domainLayer, "Usa", "");
             monitoringApplicationService.Uses(locationRepository, "", "");
+            locationRepository.Uses(supermercado, "Usa", "");
 
             locationRepository.Uses(database, "", "");
 
@@ -142,11 +143,7 @@ namespace c4_model_design
             styles.Add(new ElementStyle("MonitoringController") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("MonitoringApplicationService") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("MonitoringDomainModel") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("FlightStatus") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("FlightRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("VaccineLoteRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("LocationRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("AircraftSystemFacade") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
 
             ComponentView componentView1 = viewSet.CreateComponentView(mappingContext, "Components1", "Component Diagram");
             componentView1.PaperSize = PaperSize.A4_Landscape;
@@ -154,32 +151,33 @@ namespace c4_model_design
             componentView1.Add(apiRest);
             componentView1.Add(database);
             componentView1.Add(googleMaps);
+            componentView1.Add(supermercado);
             componentView1.AddAllComponents();
 
-            // 3. Diagrama de Componentes (security Context)
+            // 4. Diagrama de Componentes (security Context)
             Component securityComponent = securityContext.AddComponent("Security Component", "", "NodeJS (NestJS)");
-            Component verifyUser= securityContext.AddComponent("MonitoringApplicationService", "Provee métodos para el monitoreo, pertenece a la capa Application de DDD", "NestJS Component");
+            Component verifyUser= securityContext.AddComponent("verifyUser", "Provee métodos para la verificacion de cuenta de usuario", "NestJS Component");
             Component verifyUserRepository = securityContext.AddComponent("verifyUserRepository", "Información del Usuario", "NestJS Component");
+            Component twoStepsVerifiy = securityContext.AddComponent("twoStepsVerifiy", "Verficacion de dos pasos", "NestJS Component");
 
             apiRest.Uses(securityComponent, "", "JSON/HTTPS");
-            securityComponent.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
+            securityComponent.Uses(verifyUser, "Invoca métodos de verificacion");
 
-            monitoringApplicationService.Uses(securityComponent, "Usa", "");
-            monitoringApplicationService.Uses(verifyUser, "", "");
-            monitoringApplicationService.Uses(verifyUserRepository, "", "");
+            verifyUser.Uses(verifyUserRepository, "", "");
+            verifyUser.Uses(twoStepsVerifiy, "Usa", "");
 
-            locationRepository.Uses(database, "", "");
-
-            locationRepository.Uses(googleMaps, "", "JSON/HTTPS");
+            verifyUserRepository.Uses(database, "", "");
 
             // Tags
             securityComponent.AddTags("securityComponent");
             verifyUser.AddTags("verifyUser");
             verifyUserRepository.AddTags("verifyUserRepository");
+            twoStepsVerifiy.AddTags("twoStepsVerifiy");
 
             styles.Add(new ElementStyle("securityComponent") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("verifyUser") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("verifyUserRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("twoStepsVerifiy") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
 
             ComponentView componentView2 = viewSet.CreateComponentView(securityContext, "Components2", "Component Diagram");
             componentView2.PaperSize = PaperSize.A4_Landscape;
