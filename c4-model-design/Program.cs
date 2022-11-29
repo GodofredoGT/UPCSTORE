@@ -32,8 +32,8 @@ namespace c4_model_design
             Person user = model.AddPerson("Usuario", "Usuario comun");
             Person admin = model.AddPerson("Admin", "User Admin.");
 
-            user.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
-            admin.Uses(monitoringSystem, "Realiza consultas para mantenerse al tanto de la planificación de los vuelos hasta la llegada del lote de vacunas al Perú");
+            user.Uses(monitoringSystem, "Realiza comparaciones sobre los precios de diversos productos de determinados supermercados del Perú");
+            admin.Uses(monitoringSystem, "Administra los productos, los enlaces de los supermercados registrados");
 
             monitoringSystem.Uses(googleMaps, "Usa la API de google maps");
             monitoringSystem.Uses(supermercado, "Usa la API de Mercados y tiendas");
@@ -59,14 +59,15 @@ namespace c4_model_design
             contextView.AddAllPeople();
 
             // 2. Diagrama de Contenedores
-            Container webApplication = monitoringSystem.AddContainer("Web App", "Permite a los usuarios visualizar un dashboard con el resumen de toda la información del traslado de los lotes de vacunas.", "React");
+            Container webApplication = monitoringSystem.AddContainer("Web App", "Permite a los usuarios visualizar un dashboard en el que el cliente podrá comparar precios de productos.", "React");
             Container landingPage = monitoringSystem.AddContainer("Landing Page", "", "React");
             Container apiRest = monitoringSystem.AddContainer("API REST", "API Rest", "NodeJS (NestJS) port 8080");
 
-            Container searchContext = monitoringSystem.AddContainer("Search Context", "Bounded Context de Busqueda de supermercados", "NodeJS (NestJS)");
-            Container compareContext = monitoringSystem.AddContainer("Compare Context", "Bounded Context de Comparacion de precios", "NodeJS (NestJS)");
-            Container mappingContext = monitoringSystem.AddContainer("Mapping Context", "Bounded Context de mapeo de los supermercados ", "NodeJS (NestJS)");
-            Container securityContext = monitoringSystem.AddContainer("Security Context", "Bounded Context de Seguridad", "NodeJS (NestJS)");
+            Container Cuenta = monitoringSystem.AddContainer("Cuenta", "Bounded Context de Cuenta", "NodeJS (NestJS)");
+            Container Cliente = monitoringSystem.AddContainer("Cliente", "Bounded Context de Cliente", "NodeJS (NestJS)");
+            Container Notificaciones = monitoringSystem.AddContainer("Notificaciones", "Bounded Context de Notificaciones", "NodeJS (NestJS)");
+            Container Administracion = monitoringSystem.AddContainer("Administracion", "Bounded Context de Administracion", "NodeJS (NestJS)");
+            Container Geolocalizacion = monitoringSystem.AddContainer("Geolocalizacion", "Bounded Context de mapeo de los supermercados ", "NodeJS (NestJS)");
 
             Container database = monitoringSystem.AddContainer("Database", "", "Oracle");
 
@@ -78,19 +79,26 @@ namespace c4_model_design
 
             webApplication.Uses(apiRest, "API Request", "JSON/HTTPS");
 
-            apiRest.Uses(searchContext, "", "");
-            apiRest.Uses(compareContext, "", "");
-            apiRest.Uses(mappingContext, "", "");
-            apiRest.Uses(securityContext, "", "");
+            apiRest.Uses(Cuenta, "", "");
+            apiRest.Uses(Cliente, "", "");
+            apiRest.Uses(Geolocalizacion, "", "");
+            apiRest.Uses(Notificaciones, "", "");
+            apiRest.Uses(Administracion, "", "");
 
-            searchContext.Uses(database, "", "");
-            compareContext.Uses(database, "", "");
-            mappingContext.Uses(database, "", "");
-            securityContext.Uses(database, "", "");
+            Notificaciones.Uses(Cuenta, "", "");
+            Notificaciones.Uses(Cliente, "", "");
+            Notificaciones.Uses(Administracion, "", "");
 
-            mappingContext.Uses(googleMaps, "API Request", "JSON/HTTPS");
-            searchContext.Uses(supermercado, "API Request", "JSON/HTTPS");
-            compareContext.Uses(supermercado, "API Request", "JSON/HTTPS");
+            Geolocalizacion.Uses(Notificaciones, "", "");
+
+            Cuenta.Uses(database, "", "");
+            Cliente.Uses(database, "", "");
+            Geolocalizacion.Uses(database, "", "");
+            Administracion.Uses(database, "", "");
+
+            Geolocalizacion.Uses(googleMaps, "API Request", "JSON/HTTPS");
+            Cuenta.Uses(supermercado, "API Request", "JSON/HTTPS");
+            Cliente.Uses(supermercado, "API Request", "JSON/HTTPS");
 
             // Tags
             webApplication.AddTags("WebApp");
@@ -100,10 +108,11 @@ namespace c4_model_design
 
             string contextTag = "Context";
 
-            searchContext.AddTags(contextTag);
-            compareContext.AddTags(contextTag);
-            mappingContext.AddTags(contextTag);
-            securityContext.AddTags(contextTag);
+            Cuenta.AddTags(contextTag);
+            Cliente.AddTags(contextTag);
+            Geolocalizacion.AddTags(contextTag);
+            Administracion.AddTags(contextTag);
+            Notificaciones.AddTags(contextTag);
 
             styles.Add(new ElementStyle("MobileApp") { Background = "#9d33d6", Color = "#ffffff", Shape = Shape.MobileDevicePortrait, Icon = "" });
             styles.Add(new ElementStyle("WebApp") { Background = "#9d33d6", Color = "#ffffff", Shape = Shape.WebBrowser, Icon = "" });
@@ -116,75 +125,48 @@ namespace c4_model_design
             contextView.PaperSize = PaperSize.A4_Landscape;
             containerView.AddAllElements();
 
-            // 3. Diagrama de Componentes (mapping Context)
-            Component domainLayer = mappingContext.AddComponent("Domain Layer", "", "NodeJS (NestJS)");
-            Component mappingController = mappingContext.AddComponent("MappingController", "REST API endpoints de monitoreo.", "NodeJS (NestJS) REST Controller");
-            Component monitoringApplicationService = mappingContext.AddComponent("MonitoringApplicationService", "Provee métodos para la localizacion, pertenece a la capa Application de DDD", "NestJS Component");
-            Component locationRepository = mappingContext.AddComponent("LocationRepository", "Ubicación del supermercado", "NestJS Component");
+            // 3. Diagrama de Componentes (Client Context)
+            Component domainLayer = Cliente.AddComponent("Domain Layer", "", "NodeJS (NestJS)");
+            Component clientController = Cliente.AddComponent("Client Controller", "REST API endpoints.", "NodeJS (NestJS) REST Controller");
+            Component clientApplicationService = Cliente.AddComponent("Client Application Service", "Provee métodos que serán usadas por el cliente", "NestJS Component");
+            Component compareRepository = Cliente.AddComponent("Compare Repository", "Comparación de precios de los poductos de super mercados", "NestJS Component");
+            Component locationRepository = Cliente.AddComponent("Location Repository", "Localizar supermercados para luego redirigirlos", "NestJS Component");
 
-            apiRest.Uses(mappingController, "", "JSON/HTTPS");
-            mappingController.Uses(monitoringApplicationService, "Invoca métodos de monitoreo");
+            apiRest.Uses(clientController, "", "JSON/HTTPS");
+            clientController.Uses(clientApplicationService, "");
 
-            monitoringApplicationService.Uses(domainLayer, "Usa", "");
-            monitoringApplicationService.Uses(locationRepository, "", "");
-            locationRepository.Uses(supermercado, "Usa", "");
+            clientApplicationService.Uses(domainLayer, "Usa", "");
+            clientApplicationService.Uses(compareRepository, "", "");
+            clientApplicationService.Uses(locationRepository, "", "");
 
-            locationRepository.Uses(database, "", "");
+            compareRepository.Uses(supermercado, "Usa", "");
+            compareRepository.Uses(database, "", "");
 
             locationRepository.Uses(googleMaps, "", "JSON/HTTPS");
+            locationRepository.Uses(database, "", "");
 
             // Tags
             domainLayer.AddTags("DomainLayer");
-            mappingController.AddTags("MonitoringController");
-            monitoringApplicationService.AddTags("MonitoringApplicationService");
+            clientController.AddTags("ClientController");
+            clientApplicationService.AddTags("ClientApplicationService");
+            compareRepository.AddTags("CompareRepository");
             locationRepository.AddTags("LocationRepository");
 
             styles.Add(new ElementStyle("DomainLayer") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("MonitoringController") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("MonitoringApplicationService") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("MonitoringDomainModel") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("ClientController") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("ClientApplicationService") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("ClientDomainModel") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
+            styles.Add(new ElementStyle("CompareRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
             styles.Add(new ElementStyle("LocationRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
 
-            ComponentView componentView1 = viewSet.CreateComponentView(mappingContext, "Components1", "Component Diagram");
-            componentView1.PaperSize = PaperSize.A4_Landscape;
-            componentView1.Add(webApplication);
-            componentView1.Add(apiRest);
-            componentView1.Add(database);
-            componentView1.Add(googleMaps);
-            componentView1.Add(supermercado);
-            componentView1.AddAllComponents();
-
-            // 4. Diagrama de Componentes (security Context)
-            Component securityComponent = securityContext.AddComponent("Security Component", "", "NodeJS (NestJS)");
-            Component verifyUser= securityContext.AddComponent("verifyUser", "Provee métodos para la verificacion de cuenta de usuario", "NestJS Component");
-            Component verifyUserRepository = securityContext.AddComponent("verifyUserRepository", "Información del Usuario", "NestJS Component");
-            Component twoStepsVerifiy = securityContext.AddComponent("twoStepsVerifiy", "Verficacion de dos pasos", "NestJS Component");
-
-            apiRest.Uses(securityComponent, "", "JSON/HTTPS");
-            securityComponent.Uses(verifyUser, "Invoca métodos de verificacion");
-
-            verifyUser.Uses(verifyUserRepository, "", "");
-            verifyUser.Uses(twoStepsVerifiy, "Usa", "");
-
-            verifyUserRepository.Uses(database, "", "");
-
-            // Tags
-            securityComponent.AddTags("securityComponent");
-            verifyUser.AddTags("verifyUser");
-            verifyUserRepository.AddTags("verifyUserRepository");
-            twoStepsVerifiy.AddTags("twoStepsVerifiy");
-
-            styles.Add(new ElementStyle("securityComponent") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("verifyUser") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("verifyUserRepository") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-            styles.Add(new ElementStyle("twoStepsVerifiy") { Shape = Shape.Component, Background = "#facc2e", Icon = "" });
-
-            ComponentView componentView2 = viewSet.CreateComponentView(securityContext, "Components2", "Component Diagram");
-            componentView2.PaperSize = PaperSize.A4_Landscape;
-            componentView2.Add(webApplication);
-            componentView2.Add(apiRest);
-            componentView2.Add(database);
-            componentView2.AddAllComponents();
+            ComponentView componentView = viewSet.CreateComponentView(Cliente, "Components", "Component Diagram");
+            componentView.PaperSize = PaperSize.A4_Landscape;
+            componentView.Add(webApplication);
+            componentView.Add(apiRest);
+            componentView.Add(database);
+            componentView.Add(googleMaps);
+            componentView.Add(supermercado);
+            componentView.AddAllComponents();
 
             structurizrClient.UnlockWorkspace(workspaceId);
             structurizrClient.PutWorkspace(workspaceId, workspace);
